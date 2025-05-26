@@ -90,6 +90,10 @@
             font-style: italic;
             color: #555;
         }
+
+        #history-list .history-item img.reversed{
+            transform: rotateX (180deg);
+        }
     </style>
 </head>
 
@@ -218,7 +222,8 @@
 
                             const item = document.createElement('div');
                             item.className = 'history-item';
-                            item.innerHTML = `<img src="${cardInfo.image}" alt="${cardInfo.name}"><div class="history-details"><p><strong>牌名：</strong>${cardName}</p><p><strong>方向：</strong>${orientationText}</p><p><strong>時間：</strong>${date}</p><p class="description">${description}</p></div>`;
+                            const classr = data.orientation === 'upright' ? '' : 'reversed';
+                            item.innerHTML = `<img class="${classr}" src="${cardInfo.image}" alt="${cardInfo.name}"><div class="history-details"><p><strong>牌名：</strong>${cardName}</p><p><strong>方向：</strong>${orientationText}</p><p><strong>時間：</strong>${date}</p><p class="description">${description}</p></div>`;
                             historyList.appendChild(item);
                         });
                     })
