@@ -63,7 +63,8 @@ function main() {
 function drawCard() {
     // Reset the card and meaning
     cardContainer.classList.remove('flipped');
-    cardBackImage.parentElement.classList.remove('reversed'); // Remove reversed class
+    card.classList.remove('reversed'); // Remove reversed class
+    cardBackImage.parentElement.classList.remove('reversed');
     cardFrontImage.src = 'taro/back.jpg';
     cardBackImage.src = ''; // Clear previous back image
     cardBackImage.style.transform = 'rotate(0deg)'; // Reset rotation
