@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tarot Draw</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      /* Light gray background */
+    }
+
+    .avatar {
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-left: 10px;
+    }
+
+    .auth-options {
+      position: absolute;
+      top: 50px;
+      /* Adjust position below the avatar */
+      right: 10px;
+      z-index: 1000;
+      /* Ensure options are above other content */
+      background-color: white;
+      /* Add background for visibility */
+      border: 1px solid #ccc;
+      /* Add border */
+      border-radius: 5px;
+      padding: 10px;
+      display: none;
+      /* Initially hidden */
+      z-index: 1;
+      /* Ensure auth options are above other content */
+    }
+
+    #greeting {
+      margin-right: 10px;
+      /* Add some space between greeting and avatar */
+    }
+
+    .logout-button {
+      display: block;
+      /* Always block when the container is shown */
+      width: 100%;
+      /* Make button full width of container */
+    }
+  </style>
+</head>
+
+<body class="d-flex flex-column align-items-center min-vh-100">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Tarot Draw</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="cards.html">All Cards</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="history.html">抽牌紀錄</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+        </ul>
+        <div class="d-flex align-items-center ms-auto">
+          <span id="greeting" class="navbar-text me-2"></span>
+          <img src="placeholder-avatar.png" alt="Avatar" class="avatar" id="user-avatar">
+          <div class="auth-options" id="auth-options" style="display: none;">
+            <a href="profile.html" class="btn btn-outline-primary btn-sm mb-2 d-none" id="profile-link">Profile</a>
+            <a href="#" class="btn btn-outline-danger btn-sm logout-button d-none" id="logout-button">Logout</a>
+            <a href="login.html" class="btn btn-outline-success btn-sm d-none" id="login-link">Login</a>
+            <a href="signup.html" class="btn btn-outline-info btn-sm d-none" id="signup-link">Sign Up</a>
+          </div>
+        </div>
+      </div>
+  </nav>
+
+  <div class="container text-center my-5 flex-grow-1 d-flex flex-column justify-content-center">
+    <h1 class="mb-4 text-primary">Tarot Card Draw</h1>
+
+    <div class="card-container mx-auto mb-4 shadow-lg rounded">
+      <div class="card">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <img class="card-image img-fluid" src="taro/back.jpg" alt="Tarot Card Back">
+          </div>
+          <div class="card-face card-back">
+            <img class="card-image img-fluid" src="" alt="Tarot Card Front">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-meaning mt-4 p-4 bg-white rounded shadow-sm">
+      <h2 class="card-name mb-3 text-secondary"></h2>
+      <p class="card-upright text-success"></p>
+      <p class="card-reversed text-danger"></p>
+    </div>
+
+    <button id="draw-button" class="btn btn-primary btn-lg mt-4">Draw Card</button>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="main.js"></script>
+  <!-- Firebase App (must be first) -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <!-- Firebase Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="auth.js"></script>
+  <script>
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBuRCHP14QZ88vFgzzLllucz81W2Wg8ooA",
+      authDomain: "ydfinal-85ba7.firebaseapp.com",
+      projectId: "ydfinal-85ba7",
+      storageBucket: "ydfinal-85ba7.appspot.com",
+      messagingSenderId: "990150407713",
+      appId: "1:990150407713:web:3a248bf398b8bb48849560"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Assuming uploadCardDraw is defined in main.js or included elsewhere
+    function uploadCardDraw(card) {
+      const user = auth.currentUser;
+      if (user) {
+        const now = new Date();
+        // Using server timestamp is generally better for consistency
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+        const cardData = {
+          cardName: card.name,
+          orientation: card.orientation, // "upright" or "reversed"
+          timestamp: timestamp, // Using timestamp field name
+          userId: user.uid // Include user ID for querying
+
+        };
+
+        // Save to cardDraws/{user_uid}/draws subcollection
+        db.collection("cardDraws").doc(user.uid).collection("draws").add(cardData)
+          .then(() => {
+            console.log("✅ 抽卡資料已成功上傳！");
+          })
+          .catch((error) => {
+            console.error("❌ 上傳錯誤：", error);
+          });
+      } else {
+        console.warn("❌ 使用者未登入，無法上傳抽卡資料。");
+      }
+    }
+
+    // Get references to the elements
+    const userAvatar = document.getElementById('user-avatar');
+    const authOptions = document.getElementById('auth-options');
+    const profileLink = document.getElementById('profile-link');
+    const logoutButton = document.getElementById('logout-button');
+    const loginLink = document.getElementById('login-link');
+    const signupLink = document.getElementById('signup-link');
+    const greetingElement = document.getElementById('greeting');
+
+    // Toggle auth options display
+    userAvatar.addEventListener('click', () => {
+      authOptions.style.display = authOptions.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Handle authentication state changes
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // User is signed in
+        greetingElement.textContent = `Hello, ${user.displayName || user.email || 'User'}`;
+        userAvatar.src = user.photoURL || 'https://www.svgrepo.com/show/452030/avatar-default.svg'; // Use user photo or default
+        profileLink.classList.remove('d-none'); // Show profile link
+        logoutButton.classList.remove('d-none'); // Show logout button
+        loginLink.classList.add('d-none'); // Hide login link
+        signupLink.classList.add('d-none'); // Hide signup link
+      } else {
+        // User is signed out
+        greetingElement.textContent = '';
+        userAvatar.src = 'https://www.svgrepo.com/show/452030/avatar-default.svg'; // Set to default when logged out
+        profileLink.classList.add('d-none'); // Hide profile link
+        logoutButton.classList.add('d-none'); // Hide logout button
+        loginLink.classList.remove('d-none'); // Show login link
+        signupLink.classList.remove('d-none'); // Show signup link
+      }
+    });
+
+    // Handle logout
+    logoutButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      auth.signOut().then(() => {
+        console.log('User signed out');
+        authOptions.style.display = 'none'; // Hide options after logout
+        // Redirect to login page or home page
+        // window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error('Logout Error:', error);
+      });
+    });
+
+    // Set initial avatar image based on auth state
+    if (auth.currentUser) userAvatar.src = auth.currentUser.photoURL || 'https://www.svgrepo.com/show/452030/avatar-default.svg';
+    else userAvatar.src = 'https://www.svgrepo.com/show/452030/avatar-default.svg';
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        // User is not signed in, redirect to login page
+        window.location.href = 'login.html';
+      }
+    });
+
+  </script>
+</body>
+
+</html>

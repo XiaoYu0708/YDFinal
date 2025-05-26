@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #googleSignInBtn {
+            background-color: #db4437;
+        }
+
+        #googleSignInBtn:hover {
+            background-color: #c33d32;
+        }
+
+
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        .status {
+            margin-top: 20px;
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Login / Signup</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="signupBtn">Signup</button>
+        <button id="loginBtn">Login</button>
+        <button id="googleSignInBtn">Sign in with Google</button>
+        <div id="status" class="status"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyBuRCHP14QZ88vFgzzLllucz81W2Wg8ooA",
+            authDomain: "ydfinal-85ba7.firebaseapp.com",
+            projectId: "ydfinal-85ba7",
+            storageBucket: "ydfinal-85ba7.firebasestorage.app",
+            messagingSenderId: "990150407713",
+            appId: "1:990150407713:web:3a248bf398b8bb48849560"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const signupBtn = document.getElementById('signupBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        const statusDiv = document.getElementById('status');
+
+        // Handle user status changes
+        auth.onAuthStateChanged(user => {
+            if (user) {
+               window.location.href = 'index.html'; // Redirect if already logged in
+            } else {
+                statusDiv.textContent = 'Not logged in';
+                // Show login/signup form
+            }
+        });
+
+        // Handle signup
+        signupBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed up
+                    const user = userCredential.user;
+                    window.location.href = 'index.html'; // Redirect on successful signup
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    statusDiv.textContent = `Error signing up: ${errorMessage}`;
+                });        });
+        // Handle login
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed in
+                    window.location.href = 'index.html'; // Redirect on successful login
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    statusDiv.textContent = `Error logging in: ${errorMessage}`;
+                });
+        });
+
+        // Handle Google Sign-in
+        googleSignInBtn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider) // Changed back to signInWithPopup
+                .then((result) => {
+                    window.location.href = 'index.html'; // Redirect on successful sign-in
+                })
+                .catch((error) => {
+                    const errorMessage = error.message;
+                    statusDiv.textContent = `Error signing in with Google: ${errorMessage}`;
+                });
+        });
+    </script>
+</body>
+
+</html>
