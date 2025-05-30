@@ -53,6 +53,15 @@
             background-color: #c33d32;
         }
 
+        #githubSignInBtn {
+            background-color: #333;
+            /* GitHub's primary color */
+        }
+
+        #githubSignInBtn:hover {
+            background-color: #222;
+        }
+
 
 
         button:hover {
@@ -74,6 +83,7 @@
         <button id="signupBtn">Signup</button>
         <button id="loginBtn">Login</button>
         <button id="googleSignInBtn">Sign in with Google</button>
+        <button id="githubSignInBtn">Sign in with GitHub</button>
         <div id="status" class="status"></div>
     </div>
 
@@ -101,6 +111,7 @@
         const signupBtn = document.getElementById('signupBtn');
         const loginBtn = document.getElementById('loginBtn');
         const googleSignInBtn = document.getElementById('googleSignInBtn');
+        const githubSignInBtn = document.getElementById('githubSignInBtn');
         const statusDiv = document.getElementById('status');
 
         // Handle user status changes
@@ -156,6 +167,19 @@
                 .catch((error) => {
                     const errorMessage = error.message;
                     statusDiv.textContent = `Error signing in with Google: ${errorMessage}`;
+                });
+        });
+
+        // Handle GitHub Sign-in
+        githubSignInBtn.addEventListener('click', () => {
+            const provider = new firebase.auth.GithubAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    window.location.href = 'index.html'; // Redirect on successful sign-in
+                })
+                .catch((error) => {
+                    const errorMessage = error.message;
+                    statusDiv.textContent = `Error signing in with GitHub: ${errorMessage}`;
                 });
         });
     </script>
